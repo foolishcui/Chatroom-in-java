@@ -1,0 +1,231 @@
+<!-- <%--
+    Document   : chat
+    Created on : 2016-6-30, 13:53:20
+    Author     : foolishcui
+--%>
+
+<%@page import="myejb.MyServerBeanRemote"%>
+<%@page import="javax.naming.InitialContext"%>
+<%@page import="java.util.Properties"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%> -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <base href="<%=basePath%>">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Chatroom</title>
+    <meta name="keywords" content="chatroom">
+    <meta name="description" content="chatroom">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/style.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="iconfont/iconfont.css">
+    <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/jquery.emojiarea.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.emojiarea.js"></script>
+    <script src="js/packs/basic/emojis.js"></script>
+</head>
+<!-- 连接服务器 -->
+<!-- <% Properties props = new Properties();
+            props.setProperty("org.omg.CORBA.ORBInitialHost", "172.24.37.20");
+            props.setProperty("org.omg.CORBA.ORBInitialPort", "3700");
+            //连接
+            InitialContext ic = new InitialContext(props);
+            MyServerBeanRemote msbr=(MyServerBeanRemote)ic.lookup("java:global/MyEntApp/MyEntApp-ejb/MyServerBean");
+%> -->
+<body onload="connect()">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox chat-view">
+                    <div class="ibox-content">
+                        <div class="row">
+
+                            <!-- 用户列表 -->
+                            <div class="col-sm-3" style="padding-left: 45px;">
+                                <!-- 个人区域 -->
+                                <div class="chat-user chat-owner">
+                                    <img data-toggle="dropdown" class="dropdown-toggle chat-avatar" src="img/0.png" alt="">
+                                    <div class="chat-user-name-list" style="color: #fff;"><!-- <%=msbr.getnameById((Integer)session.getAttribute("userid"))%> -->崔志彤<b class="caret"></b>
+                                    </div>
+                                    <span class="pull-right"><img src="img/power.png" id="power" alt="" onclick="closeWebSocket();"></span>
+                                    <ul class="dropdown-menu animated fadeInRight m-t-xs" style="margin-top: -620px; margin-right: -210px;">
+                                        <li class="profile">姓名：<span><%=msbr.getnameById((Integer)session.getAttribute("userid"))%></span></li>
+                                        <li class="divider"></li>
+                                        <li class="profile">性别：<span><%=msbr.getsexById((Integer)session.getAttribute("userid"))%></span></li>
+                                        <li class="divider"></li>
+                                        <li class="profile">电话：<span><%=msbr.getTeleById((Integer)session.getAttribute("userid"))%></span></li>
+                                        <li class="divider"></li>
+                                        <li class="profile">邮箱：<span><%=msbr.getemailById((Integer)session.getAttribute("userid"))%></span></li>
+                                    </ul>
+                                    <div class="chat-search">
+                                        <input type="text" class="form-control search-input"  placeholder="搜索聊天记录">
+                                    </div>
+                                </div>
+
+                                <!-- 好友列表 -->
+                                <div class="chat-users">
+                                    <div class="users-list">
+                                        <nav class="navbar-default navbar-static-side" role="navigation">
+                                            <div class="sidebar-collapse">
+                                                <ul class="nav" id="side-menu">
+                                                    <li>
+                                                        <a href="#">
+                                                            <i class="icon iconfont">&#xe672;</i>
+                                                            <span class="nav-label">公共聊天</span>
+                                                            <span class="fa arrow pu pull-right"></span>
+                                                        </a>
+                                                        <ul class="nav nav-second-level">
+                                                            <li>
+                                                                <a class="J_menuItem chat-user">
+                                                                    <img class="chat-avatar" src="img/1.png" alt="">
+                                                                    <div class="chatonline chat-user-name-list">软工课设小组
+                                                                    </div>
+                                                                    <input type="radio" class="onlinepeople " name="onlinepeople">
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="J_menuItem chat-user">
+                                                                    <img class="chat-avatar" src="img/1.png" alt="">
+                                                                    <div class="chatonline chat-user-name-list">软工课设小组
+                                                                    </div>
+                                                                    <input type="radio" class="onlinepeople" name="onlinepeople">
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#">
+                                                            <i class="icon iconfont">&#xe60e;</i>
+                                                            <span class="nav-label" style="padding-left: 1px;">在线用户</span>
+                                                            <span class="fa arrow"></span>
+                                                        </a>
+                                                        <ul class="nav nav-second-level" id="userList">
+                                                            <li>
+                                                               <a class="chat-user J_menuItem">
+                                                                    <img class="chat-avatar" src="img/2.png" alt="">
+                                                                    <div class="chatonline chat-user-name-list">李欢
+                                                                    </div>
+                                                                    <input type="radio" class="onlinepeople" name="onlinepeople">
+                                                               </a>
+                                                            </li>
+                                                            <li>
+                                                               <a class="chat-user J_menuItem">
+                                                                    <img class="chat-avatar" src="img/2.png" alt="">
+                                                                    <div class="chatonline chat-user-name-list">李欢
+                                                                    </div>
+                                                                    <input type="radio" class="onlinepeople" name="onlinepeople">
+                                                               </a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <!-- 聊天窗口 -->
+                        <div class="col-sm-9">
+                            <!-- 聊天标题 -->
+                            <div class="dropdown chat-title">
+                                <div data-toggle="dropdown" class="dropdown-toggle chat-user-name-title text-center chattitle">满阳<b class="caret"></b></div>
+                                <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                    <li class="profile">姓名：<span>李欢</span></li>
+                                    <li class="divider"></li>
+                                    <li class="profile">性别：<span>男</span></li>
+                                    <li class="divider"></li>
+                                    <li class="profile">生日：<span>1995.11.22</span></li>
+                                    <li class="divider"></li>
+                                    <li class="profile">签名：<span>good good study day up up</span></li>
+                                </ul>
+                                <hr>
+                            </div>
+
+                            <!-- 聊天内容 -->
+                            <div class="chat-discussion" id="message">
+
+                                <div class="chat-message">
+                                    <div class="chat-user-name-chat">李欢</div>
+                                        <form action="NewServlet" onsubmit="return fileName();">
+                                            <div class="message">
+                                                <span id="filename">文件名称</span>
+                                                <input type="hidden" name="file" id="file">
+                                                <button type="submit" class="doc-down btn btn-info" >下载</button>
+                                                <input type="hidden" id="getfilename" value="getfilename">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+
+                                <!-- 发送窗口 -->
+                                <div class="chat-message-form">
+                                    <div class="message-input">
+                                        <textarea class="form-control emojis-wysiwyg" name="message" id="sendtext" cols="30" rows="4" placeholder="输入您要发送的消息，按回车键发送">Hello~</textarea>
+                                        <!-- <div class="value"><pre id="emojis-wysiwyg-value"></pre></div> -->
+                                        <div class="message-choice">
+                                            <!-- <div class="emotion" style="display: inline-block;">
+                                                <span class="emoji"><i class="em em-smiley"></i></span>
+                                                <span class="emoji"><i class="em em-blush"></i></span>
+                                                <span class="emoji"><i class="em em-heart_eyes"></i></span>
+                                                <span class="emoji"><i class="em em-kissing_heart"></i></span>
+                                                <span class="emoji"><i class="em em-stuck_out_tongue_closed_eyes"></i></span>
+                                                <span class="emoji"><i class="em em-yum"></i></span>
+                                                <span class="emoji"><i class="em em-grin"></i></span>
+                                                <span class="emoji"><i class="em em-angry"></i></span>
+                                                <span class="emoji"><i class="em em-wink"></i></span>
+                                            </div> -->
+                                            <div style="display: inline-block; position: relative; margin-bottom: 5px; ">
+                                                <span style="font-size: 10px; text-decoration: underline; color: #747474; cursor: pointer;" id="doc" onclick="upfile.click()">
+                                                    <i class="icon iconfont" style="font-size: 16px; color: #979aa6; padding-left: 10px; margin-right: -3px; padding-top: -9px; cursor: pointer;">&#xe6f1;</i>
+                                                上传文件</span>
+                                            </div>
+                                            <!-- <img src="img/doc.png" id="doc" alt="" onclick="upfile.click()"> -->
+                                            <input type="file" id="upfile" name="upfile" onchange="filesend()">
+                                            <div class="pull-right" style="float: right;"><button id="send" onclick="send()">发送</button></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局js -->
+    <script src="js/bootstrap.min.js?v=3.3.5"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/layer/layer.min.js"></script>
+
+    <!-- 自定义js -->
+    <script src="js/hplus.js?v=4.0.0"></script>
+    <script src="js/content.js"></script>
+    <script type="text/javascript">
+        // $("span.emoji").click(function(){
+        //     var em = $(this).html();
+        //     var textarea = $("#sendtext").val();
+        //     console.log(em);
+        //     textarea += em;
+        //     $("#sendtext").val(textarea);
+        // });
+
+        var $wysiwyg = $('.emojis-wysiwyg').emojiarea({wysiwyg: true});
+        $wysiwyg.trigger('change');
+    </script>
+</body>
+</html>
